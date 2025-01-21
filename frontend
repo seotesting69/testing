@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Using SerpApi</title>
+</head>
+<body>
+    <h1>Search Using SerpApi</h1>
+    <input type="text" id="searchQuery" placeholder="Enter your search query">
+    <button onclick="searchSerpApi()">Search</button>
+    <div id="results"></div>
+
+    <script>
+        // Function to search using the proxy server (backend)
+        async function searchSerpApi() {
+    const searchQuery = document.getElementById('searchQuery').value; // Get the search query
+    const location = 'Indonesia'; // Set the location as needed (you can make it dynamic)
+
+    if (!searchQuery) {
+        alert("Please enter a search query.");
+        return;
+    }
+
+    // Display a message while waiting
+    document.getElementById('results').innerHTML = 'Please wait, fetching results...';
+
+    // Call your server instead of SerpApi directly
+    const url = `http://localhost:3000/search?q=${encodeURIComponent(searchQuery)}&location=${encodeURIComponent(location)}&google_domain=google.co.id&gl=id&hl=id`;
+
+    try {
+        const response = await fetch(url); // Call the proxy server
+        const data = await response.json(); // Parse the JSON response
+
+        document.getElementById('results').innerHTML = ''; // Clear previous results
+
+        // Check if organic results are present
+        if (data.organic_results) {
+            // Loop through the organic search results and display them
+            data.organic_results.forEach(result => {
+                const resultElement = document.createElement('div');
+                
+                // Create the result content with title, link, displayed link, and snippet
+                resultElement.innerHTML = `
+                    <div>
+                        <h2><a href="${result.link}" target="_blank">${result.title}</a></h2>
+                        <p><strong>Link:</strong> <a href="${result.link}" target="_blank">${result.displayed_link}</a></p>
+                        <p><strong>Snippet:</strong> ${result.snippet}</p>
+                    </div>
+                    <hr>
+                `;
+                
+                // Append the result to the results div
+                document.getElementById('results').appendChild(resultElement);
+            });
+        } else {
+            document.getElementById('results').innerHTML = 'No results found.';
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('results').innerHTML = 'An error occurred while fetching the data.';
+    }
+}
+
+    </script>
+</body>
+</html>
