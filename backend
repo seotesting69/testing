@@ -1,0 +1,40 @@
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
+const app = express();
+const PORT = 3000;
+
+// Enable CORS for all origins
+app.use(cors());
+
+// Your SerpApi API Key
+const apiKey = 'YOUR_SERPAPI_API_KEY'; // Make sure to use your actual SerpApi API key
+
+// Route to handle search queries
+app.get('/search', async (req, res) => {
+  const searchQuery = req.query.q; // Get search query from the frontend
+  const location = req.query.location || 'Indonesia'; // Get location from the frontend (default to 'Indonesia')
+
+  if (!searchQuery) {
+    return res.status(400).send('Search query is required');
+  }
+
+  // Construct the SerpApi URL with query, location, google_domain, gl, and hl
+  const url = `https://serpapi.com/search?q=${encodeURIComponent(searchQuery)}&google_domain=google.co.id&location=${encodeURIComponent(location)}&gl=id&hl=id&api_key=${apiKey}`;
+
+  try {
+    // Make the HTTP request to SerpApi
+    const response = await axios.get(url);
+
+    // Send the SerpApi data back to the frontend
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching data from SerpApi:', error);
+    res.status(500).send('Error fetching data from SerpApi');
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
